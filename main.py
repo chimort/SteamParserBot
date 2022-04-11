@@ -55,12 +55,21 @@ def output(gamesList):
 
 
 result = []
-for x in range(0, 151, 50):
-    data = get_data(f'https://store.steampowered.com/search/results/?query&start={x}&count=50&dynamic_data=&sort_by=_ASC&category1=998&snr=1_7_7_2300_7&specials=1&infinite=1')
-    result.append(parse(data))
 
 
-output(result)
+def enumeration_of_results(): #кол-во игр
+    for x in range(0, round(total_result(url)/2) - 500, 100):
+        data = get_data(f'https://store.steampowered.com/search/results/?query&start={x}&count=100&dynamic_data=&sort_by=_ASC&category1=998&snr=1_7_7_2300_7&specials=1&infinite=1')
+        result.append(parse(data))
+    return output(result)
+
+
+def main():
+    enumeration_of_results()
+
+
+if __name__ == '__main__':
+    main()
 
 # df = pd.read_csv('Games_price_list.csv')
 # print(df.head())
