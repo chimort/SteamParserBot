@@ -6,15 +6,7 @@ from bs4 import BeautifulSoup
 url = 'https://store.steampowered.com/search/results/?query&start=0&count=50&dynamic_data=&sort_by=_ASC&category1=998&snr=1_7_7_2300_7&specials=1&infinite=1'
 
 
-def total_result(url):
-    r = requests.get(url)
-    data = dict(r.json())
-    total_Result = data['total_count']
-
-    return int(total_Result)
-
-
-def get_data(url):
+def data_dict(url):
     r = requests.get(url)
     data = dict(r.json())
 
@@ -46,30 +38,23 @@ def parse(data):
     return gamesList
 
 
-def output(gamesList):
-    gamesdf = pd.concat([pd.DataFrame(g) for g in result])
-    gamesdf.to_csv('Games_price_list.csv', index=False)
+def get_data(url):
+    result = []  # TOTAL LIST OF GAMES
 
-    return
+    total_result = int(dict(requests.get(url).json())['total_count'])
 
+    for products in range(0, total_result, 100):
+        result.append(parse(data_dict(
+            f'https://store.steampowered.com/search/results/?query&start={products}&count=100&dynamic_data=&sort_by=_ASC&category1=998&snr=1_7_7_2300_7&specials=1&infinite=1')))
 
-result = []
+    """NEED TO ADD GENRE AND AMOUNT OF GAMES"""
 
-
-def enumeration_of_results(): #кол-во игр
-    for x in range(0, 10, 100):
-        data = get_data(f'https://store.steampowered.com/search/results/?query&start={x}&count=100&dynamic_data=&sort_by=_ASC&category1=998&snr=1_7_7_2300_7&specials=1&infinite=1')
-        result.append(parse(data))
-    return output(result)
+    pd.concat([pd.DataFrame(g) for g in result]).to_csv('Games.csv', index=False)
 
 
 def main():
-    enumeration_of_results()
+    get_data(url)
 
 
 if __name__ == '__main__':
     main()
-
-# df = pd.read_csv('Games_price_list.csv')
-# print(df.head())
-
