@@ -7,7 +7,7 @@ url = 'https://store.steampowered.com/search/results/?query&start=0&count=100&dy
 
 genre_dict = {
     'action': 'https://store.steampowered.com/search/results/?query&start=0&count=100&dynamic_data=&sort_by=_ASC&ignore_preferences=1&tags=19&snr=1_7_7_2300_7&specials=1&infinite=1',
-    'for one player': 'https://store.steampowered.com/search/results/?query&start=0&count=100&dynamic_data=&ignore_preferences=1&force_infinite=1&category3=2&specials=1&snr=1_7_7_2300_7&infinite=1',
+    'for one player': 'https://store.steampowered.com/search/results/?query&start=50&count=50&dynamic_data=&sort_by=_ASC&category1=998&category3=2&snr=1_7_7_2300_7&specials=1&infinite=1',
     'strategy': 'https://store.steampowered.com/search/results/?query&start=0&count=100&dynamic_data=&ignore_preferences=1&force_infinite=1&tags=9&specials=1&snr=1_7_7_2300_7&infinite=1',
     'horror': 'https://store.steampowered.com/search/results/?query&start=0&count=100&dynamic_data=&ignore_preferences=1&force_infinite=1&tags=1667&specials=1&snr=1_7_7_2300_7&infinite=1',
     'coop': 'https://store.steampowered.com/search/results/?query&start=0&count=100&dynamic_data=&sort_by=_ASC&ignore_preferences=1&category3=9&snr=1_7_7_2300_7&specials=1&infinite=1',
@@ -53,15 +53,11 @@ def get_data(url, amount):
     total_result = int(dict(requests.get(url).json())['total_count'])
 
     if amount != 0:
-        for products in range(0, 50, 100):
-            result.append(parse(data_dict(
-                f'{url.replace("start=0", f"start={products}")}')))
+        result.append(parse(data_dict(url)))
     else:
         for products in range(0, total_result, 100):
             result.append(parse(data_dict(
                 f'{url.replace("start=0", f"start={products}")}')))
-
-    """NEED TO ADD GENRE AND AMOUNT OF GAMES"""
 
     pd.concat([pd.DataFrame(g) for g in result]).to_csv('Games.csv', index=False)
 
@@ -74,7 +70,7 @@ def send_not_all_games(amount):
     if amount == 10:
         a = 11
     else:
-        a = 51
+        a = 21
 
     with open('Games.csv', 'r') as f:
         for item in f:
@@ -86,21 +82,21 @@ def send_not_all_games(amount):
     card = '\n'.join('Title - {0} \n'
                      'Start Price - {1} \n'
                      'Current Price - {2}\n'
-                     'Discount - {3}\n'
+                     'Discount = {3}\n'
                      'Link - {4}\n'.format(item.split(',')[0],
                                            item.split(',')[1],
                                            item.split(',')[2],
                                            item.split(',')[3],
                                            item.split(',')[4], ) for item in list_of_games)
-    print(f'len - {len(list_of_games)}')
-    return print(card)
+
+    return card
 
 
 def main(amount=0, genre='all'):
     if genre != 'all':
-        get_data(url=genre_dict.get(genre), amount=0)
+        get_data(url=genre_dict.get(genre), amount=amount)
     else:
-        get_data(url, amount)
+        get_data(url, amount=amount)
 
 
 if __name__ == '__main__':
