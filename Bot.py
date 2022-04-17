@@ -9,14 +9,15 @@ from aiofiles import os
 bot = Bot(token=getenv("BOT_TOKEN"))
 dp = Dispatcher(bot)
 
-
 game_genre = ''
+
+genres = ['action', 'for one player', 'strategy',
+          'horror', 'coop', 'puzzle', 'all']
 
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    start_buttons = ['action', 'for one player', 'strategy',
-                     'horror', 'coop', 'puzzle', 'all']
+    start_buttons = genres
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*start_buttons)
 
@@ -26,25 +27,44 @@ async def start(message: types.Message):
 @dp.message_handler(Text(equals=['action', 'for one player', 'strategy',
                                  'horror', 'coop', 'puzzle', 'all']))
 async def genre(message: types.Message):
-    genre_buttons = 'See discounts'
-    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(genre_buttons)
+    s_disc = types.InlineKeyboardButton(text='Continue', callback_data='s_disc')
+    change_g = types.InlineKeyboardButton(text='Change genre', callback_data='return')
+    inl_k = types.InlineKeyboardMarkup(row_width=2)
+    inl_k.insert(change_g)
+    inl_k.insert(s_disc)
     global game_genre
     game_genre = message.text
-    await message.answer(f'You choose genre - "{message.text}"', reply_markup=keyboard)
+    global msg1
+    global msg2
+    global chat_id
+    chat_id = message.chat.id
+    msg1 = await message.answer(f'You choose genre - "{message.text}"', reply_markup=types.ReplyKeyboardRemove())
+    msg2 = await message.answer(f'You can Change genre or you can Continue', reply_markup=inl_k)
 
 
-@dp.message_handler(Text(equals='See discounts'))
-async def amount_of_discounts(message: types.Message):
+@dp.callback_query_handler(lambda c: c.data == 'return')
+async def process_callback_button1(callback_query: types.CallbackQuery):
+    await bot.answer_callback_query(callback_query.id)
+    keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
+    keyboard.add(*genres)
+    await msg1.delete()
+    await msg2.delete()
+    await bot.send_message(callback_query.from_user.id,
+                           "Which game genre do you want to see?", reply_markup=keyboard)
+
+
+@dp.callback_query_handler(lambda c: c.data == 's_disc')
+async def process_callback_button1(callback_query: types.CallbackQuery):
     buttons = ['1-10 games', '1-20 games', 'all games']
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(*buttons)
-    await message.answer('How many games do you want to see?', reply_markup=keyboard)
+    await msg1.delete()
+    await msg2.delete()
+    await bot.send_message(chat_id, text='How many games do you want to see?', reply_markup=keyboard)
 
 
 @dp.message_handler(Text(equals=['1-10 games', '1-20 games', 'all games']))
 async def send_discount(message: types.Message):
-    chat_id = message.chat.id
     try:
         if message.text == '1-10 games':
             await message.answer('Wait...')
@@ -57,8 +77,11 @@ async def send_discount(message: types.Message):
             await message.answer(commands.send_not_all_games(20))
             await os.remove('Games.csv')
         else:
-            await message.answer('Wait...')
-            await send_all_data(chat_id)
+            try:
+                await message.answer('Wait...')
+                await send_all_data(chat_id=chat_id)
+            except NameError:
+                await message.answer('first you have to write "/start"')
     except requests.exceptions.MissingSchema:
         await message.answer('first you have to write "/start"')
 
