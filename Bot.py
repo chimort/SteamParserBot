@@ -71,11 +71,13 @@ async def send_discount(message: types.Message):
             commands.main(10, genre=game_genre)
             await message.answer(commands.send_not_all_games(10))
             await os.remove('Games.csv')
+            await message.answer('/start :-)', reply_markup=types.ReplyKeyboardRemove())
         elif message.text == '1-20 games':
             await message.answer('Wait...')
             commands.main(20, genre=game_genre)
             await message.answer(commands.send_not_all_games(20))
             await os.remove('Games.csv')
+            await message.answer('/start :-)', reply_markup=types.ReplyKeyboardRemove())
         else:
             try:
                 await message.answer('Wait...')
@@ -90,6 +92,7 @@ async def send_all_data(chat_id=''):
     file = commands.main(amount=0)
     await bot.send_document(chat_id=chat_id, document=open('Games.csv', 'rb'))
     await os.remove('Games.csv')
+    game_genre = ''
 
 
 if __name__ == '__main__':
