@@ -28,18 +28,18 @@ def parse(data):
     games = soup.find_all('a')
     for game in games:
         title = game.find('span', {'class': 'title'}).text
-        start_price = game.find('div', {'class': 'search_price'}).text.strip().split('₸')[0]
+        start_price = game.find('div', {'class': 'search_price'}).text.strip().split('$')[0]
         discount = game.find('div', {'class': 'search_discount'}).text
         link = game.get('href')
         try:
-            current_price = game.find('div', {'class': 'search_price'}).text.strip().split('₸')[1]
+            current_price = game.find('div', {'class': 'search_price'}).text.strip().split('$')[1]
         except:
             current_price = start_price
 
         suspect_games = {
             'title': title,
-            'start_price': start_price + '₸',
-            'current_price': current_price + '₸',
+            'start_price': start_price + '$',
+            'current_price': current_price + '$',
             'discount': discount.replace('\n', ''),
             'link': link
         }
@@ -77,7 +77,7 @@ def send_not_all_games(amount):
             if a == 0:
                 break
             a -= 1
-            list_of_games.append(item.replace('‚ё', '₸').replace('в', '').strip())
+            list_of_games.append(item.replace('‚ё', '$').replace('в', '').strip())
     list_of_games.pop(0)
     card = '\n'.join('Title - {0} \n'
                      'Start Price - {1} \n'
