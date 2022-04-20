@@ -28,7 +28,7 @@ def parse(data):
     games = soup.find_all('a')
     for game in games:
         title = game.find('span', {'class': 'title'}).text
-        start_price = game.find('div', {'class': 'search_price'}).text.strip()[0]
+        start_price = game.find('div', {'class': 'search_price'}).text.strip().split('$')[0]
         discount = game.find('div', {'class': 'search_discount'}).text
         link = game.get('href')
         try:
