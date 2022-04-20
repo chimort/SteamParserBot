@@ -28,7 +28,10 @@ def parse(data):
     games = soup.find_all('a')
     for game in games:
         title = game.find('span', {'class': 'title'}).text
-        start_price = game.find('div', {'class': 'search_price'}).text.strip().split('$')[1]
+        try:
+            start_price = game.find('div', {'class': 'search_price'}).text.strip().split('$')[1]
+        except:
+            start_price = 'absent'
         discount = game.find('div', {'class': 'search_discount'}).text
         link = game.get('href')
         try:
@@ -36,13 +39,22 @@ def parse(data):
         except:
             current_price = start_price
 
-        suspect_games = {
-            'title': title,
-            'start_price': start_price + '$',
-            'current_price': current_price + '$',
-            'discount': discount.replace('\n', ''),
-            'link': link
-        }
+        if start_price != 'absent':
+            suspect_games = {
+                'title': title,
+                'start_price': start_price + '$',
+                'current_price': current_price + '$',
+                'discount': discount.replace('\n', ''),
+                'link': link
+            }
+        else:
+            suspect_games = {
+                'title': title,
+                'start_price': 'absent',
+                'current_price': current_price + '$',
+                'discount': discount.replace('\n', ''),
+                'link': link
+            }
         gamesList.append(suspect_games)
     return gamesList
 
